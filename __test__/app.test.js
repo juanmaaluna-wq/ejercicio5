@@ -1,9 +1,11 @@
 const request = require('supertest');
-const app = require('../src/app');
+const { app, resetContacts } = require('../src/app');
 
 describe('API Contacts', () => {
 
-  let createdId;
+  beforeEach(() => {
+    resetContacts();
+  });
 
   test('GET /api/contacts -> 200 y array', async () => {
     const res = await request(app).get('/api/contacts');
@@ -21,8 +23,6 @@ describe('API Contacts', () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body.name).toBe('Juan');
-
-    createdId = res.body.id;
   });
 
   test('POST /api/contacts -> 400 sin name', async () => {
@@ -46,10 +46,11 @@ describe('API Contacts', () => {
     expect(res.statusCode).toBe(400);
   });
 
+  // 👇 USAMOS ID QUE YA EXISTE
   test('GET /api/contacts/:id -> devuelve contacto', async () => {
-    const res = await request(app).get(`/api/contacts/${createdId}`);
+    const res = await request(app).get('/api/contacts/1');
     expect(res.statusCode).toBe(200);
-    expect(res.body.id).toBe(createdId);
+    expect(res.body.id).toBe(1);
   });
 
   test('GET /api/contacts/:id -> 404', async () => {
@@ -59,7 +60,7 @@ describe('API Contacts', () => {
 
   test('PUT /api/contacts/:id -> actualiza', async () => {
     const res = await request(app)
-      .put(`/api/contacts/${createdId}`)
+      .put('/api/contacts/1')
       .send({ name: 'Actualizado' });
 
     expect(res.statusCode).toBe(200);
@@ -67,12 +68,12 @@ describe('API Contacts', () => {
   });
 
   test('DELETE /api/contacts/:id -> elimina', async () => {
-    const res = await request(app).delete(`/api/contacts/${createdId}`);
+    const res = await request(app).delete('/api/contacts/1');
     expect(res.statusCode).toBe(200);
   });
 
   test('DELETE /api/contacts/:id -> 404', async () => {
-    const res = await request(app).delete(`/api/contacts/${createdId}`);
+    const res = await request(app).delete('/api/contacts/999');
     expect(res.statusCode).toBe(404);
   });
 
